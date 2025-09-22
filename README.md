@@ -83,17 +83,32 @@ With this bot you can automatically convert Apple Music links to Spotify and vic
    SMBOT_APPLE_MUSIC_PRIVATE_KEY_PATH=/path/to/AuthKey_KeyID.p8
    ```
 
-5. **Run with Docker**
+5. **Deployment Options**
+
+   **Option A: Production Deployment with systemd (Recommended)**
+
+   For production deployment with automatic startup and restart:
+   ```bash
+   sudo ./deploy.sh
+   ```
+
+   Then place your Apple Music private key in `/opt/spotify-am-bot/keys/` and start:
+   ```bash
+   sudo systemctl start spotify-am-docker
+   sudo systemctl status spotify-am-docker
+   ```
+
+   **Option B: Manual Docker Run**
    ```bash
    docker build -t spotify-apple-music-links-bot .
    docker run -d --name spotify-apple-music-links-bot \
-     -v your_local_storage_folder:/storage \
-     -v /path/to/your/apple/key:/keys \
+     -v /tmp/storage:/storage \
+     -v /opt/spotify-am-bot/keys:/keys \
      --restart=unless-stopped \
      spotify-apple-music-links-bot
    ```
 
-   Or run directly:
+   **Option C: Development Mode**
    ```bash
    npm start
    ```
@@ -102,19 +117,39 @@ With this bot you can automatically convert Apple Music links to Spotify and vic
 
 ### Adding Bot to Channel/Chat
 
-1. **Start bot privately**:
+1. **Configure bot for groups** (IMPORTANT):
+   - Go to [@BotFather](https://t.me/botfather) in Telegram
+   - Send `/mybots`
+   - Select your bot
+   - Click **Bot Settings**
+   - Click **Group Privacy**
+   - **Turn OFF** privacy mode (disable it)
+   - This allows the bot to read all messages in groups
+
+2. **Start bot privately**:
    - Find your bot in Telegram
    - Send: `/start your_SMBOT_BOT_PASSWORD`
    - Bot confirms subscription if password is correct
 
-2. **Add to channel**:
-   - Add bot to your Telegram channel/group as admin
-   - Bot will automatically monitor all messages for music links
+3. **Add to channel/group**:
+   - Add bot to your Telegram channel/group as admin (or regular member)
+   - If adding as admin, ensure it has "Read Messages" permission
+   - Run `/start your_SMBOT_BOT_PASSWORD` in the group to subscribe it
 
-3. **Automatic conversion**:
+4. **Automatic conversion**:
    - Post any Apple Music or Spotify link in the channel
    - Bot responds with converted link and match confidence
    - Example response: "🎵 Spotify → Apple Music (95% match)"
+
+### Troubleshooting Groups
+
+If the bot doesn't respond to music links in groups:
+
+1. **Check privacy settings**: Bot privacy must be OFF in @BotFather
+2. **Verify permissions**: Bot needs admin rights or "Read Messages" permission
+3. **Check subscription**: Run `/start password` in the group
+4. **View logs**: `sudo journalctl -u spotify-am-docker -f` to see if messages are received
+5. **Test commands**: Try `/help` - commands work even with privacy mode ON
 
 ### Bot Commands
 
@@ -169,6 +204,39 @@ The bot uses a sophisticated scoring system to find the best match:
 ### API Rate Limits
 - **Spotify**: 100 requests/minute (free tier)
 - **Apple Music**: 1000 requests/minute per key
+
+## System Service Management
+
+When deployed with systemd, you can manage the bot using standard systemctl commands:
+
+```bash
+# Start the service
+sudo systemctl start spotify-am-docker
+
+# Stop the service
+sudo systemctl stop spotify-am-docker
+
+# Restart the service
+sudo systemctl restart spotify-am-docker
+
+# Check service status
+sudo systemctl status spotify-am-docker
+
+# View logs
+sudo journalctl -u spotify-am-docker -f
+
+# Enable auto-start on boot
+sudo systemctl enable spotify-am-docker
+
+# Disable auto-start on boot
+sudo systemctl disable spotify-am-docker
+```
+
+### File Locations
+- **Service file**: `/etc/systemd/system/spotify-am-docker.service`
+- **Storage**: `/tmp/storage` (mapped to `/storage` in container)
+- **Keys**: `/opt/spotify-am-bot/keys` (mapped to `/keys` in container)
+- **Docker image**: `spotify-apple-music-links-bot`
 
 ## Example Usage
 

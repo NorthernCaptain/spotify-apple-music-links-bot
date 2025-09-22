@@ -1,0 +1,23 @@
+[Unit]
+Description=Spotify Apple Music Links Bot Docker Container
+Requires=docker.service
+After=docker.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=root
+ExecStartPre=-/usr/bin/docker stop spotify-apple-music-links-bot
+ExecStartPre=-/usr/bin/docker rm spotify-apple-music-links-bot
+ExecStart=/usr/bin/docker run --name spotify-apple-music-links-bot \
+    -v /tmp/storage:/storage \
+    -v /opt/spotify-am-bot/keys:/keys \
+    --restart=unless-stopped \
+    spotify-apple-music-links-bot
+ExecStop=/usr/bin/docker stop spotify-apple-music-links-bot
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

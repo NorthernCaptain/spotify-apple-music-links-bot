@@ -137,22 +137,34 @@ Need the password? Contact your administrator.`)
     async handleTextMessage(ctx) {
         const chatId = ctx.chat?.id
         const messageText = ctx.message?.text
+        const chatType = ctx.chat?.type
+        const messageFrom = ctx.message?.from?.username || ctx.message?.from?.first_name
+
+        clog(`SMBOT: Received message from chat ${chatId} (type: ${chatType}), user: ${messageFrom}`)
+        clog(`SMBOT: Subscribed chats: [${Array.from(this.chats).join(', ')}]`)
 
         // Only process messages from subscribed chats
         if (!this.chats.has(chatId)) {
+            clog(`SMBOT: Chat ${chatId} not subscribed, ignoring message`)
             return
         }
 
         if (!messageText) {
+            clog(`SMBOT: No text in message from chat ${chatId}`)
             return
         }
+
+        clog(`SMBOT: Processing message: "${messageText.substring(0, 100)}..."`)
 
         // Look for music links in the message
         const musicLinks = this.extractMusicLinks(messageText)
 
         if (musicLinks.length === 0) {
+            clog(`SMBOT: No music links found in message from chat ${chatId}`)
             return
         }
+
+        clog(`SMBOT: Found ${musicLinks.length} music link(s): ${musicLinks.join(', ')}`)
 
         // Process the first music link found
         await this.processAndReplyWithConversion(ctx, musicLinks[0])
