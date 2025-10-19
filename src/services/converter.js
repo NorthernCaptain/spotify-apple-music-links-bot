@@ -96,7 +96,7 @@ class ConverterService {
             // Get original song metadata
             const originalSong = await this.getOriginalSong(linkInfo)
             if (!originalSong) {
-                clog("Could not fetch original song metadata")
+                clog("Could not fetch original song metadata: " + JSON.stringify(linkInfo))
                 return null
             }
 
@@ -106,7 +106,7 @@ class ConverterService {
                 linkInfo.platform
             )
             if (!convertedSong) {
-                clog("Could not find matching song on target platform")
+                clog(`Could not find matching song on target platform ${linkInfo.platform}, search query: ${originalSong.artist} ${originalSong.name}`)
                 return null
             }
 
@@ -186,7 +186,7 @@ class ConverterService {
             conversionResult
 
         const platformEmojis = {
-            spotify: "🎵",
+            spotify: "🟢",
             apple_music: "🍎",
         }
 
