@@ -35,11 +35,12 @@ class SMBot {
         // Message handler for link detection
         this.bot.on("text", this.handleTextMessage.bind(this))
 
+        clog("SMBOT: Starting bot...")
         await this.bot.launch()
         process.once('SIGINT', () => this.bot.stop('SIGINT'))
         process.once('SIGTERM', () => this.bot.stop('SIGTERM'))
 
-        clog('Spotify-Apple Music bot started successfully')
+        clog("SMBOT: Bot started successfully")
     }
 
     /**
